@@ -1,0 +1,2 @@
+class Chatter:
+    pass
