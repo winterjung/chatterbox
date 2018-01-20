@@ -6,6 +6,8 @@ matrix:
   - python: '3.6'
     env: TOXENV=lint
 install:
-  - pip install tox
+  - pip install tox codecov
 script:
   - tox -e $TOXENV
+after_success:
+  - codecov
