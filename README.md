@@ -2,6 +2,9 @@
 [![license]](/LICENSE)
 [![travis]](https://travis-ci.org/JungWinter/chatterbox)
 [![codecov]](https://codecov.io/gh/JungWinter/chatterbox)
+
+---
+
 **Chatterbox**는 [카카오톡 플러스친구 자동응답 API]를 활용하여 챗봇을 만들 때 사용되는 파이썬 라이브러리입니다. 
 
 ## Installation
@@ -9,6 +12,18 @@
 ```shell
 $ pip install chatterbox.py
 ```
+
+## Usage
+
+## Test
+
+```shell
+$ pipenv install
+$ pipenv install --dev
+$ pipenv shell
+$ tox
+```
+## Contribution
 
 
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
