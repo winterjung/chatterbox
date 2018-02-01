@@ -2,6 +2,62 @@ import pytest
 from chatterbox import Keyboard, Text, Photo, MessageButton, Message
 
 
+@pytest.fixture(scope='class')
+def response_dict(request):
+    text = {
+        'text': '안녕!',
+    }
+    photo = {
+        'url': 'https://photo.src',
+        'width': 640,
+        'height': 480,
+    }
+    message_button = {
+        'label': '안녕!',
+        'url': 'https://button/url',
+    }
+    data_dict = dict(
+        input_keyboard={
+            'keyboard': {
+                'type': 'text',
+            },
+        },
+        button_keyboard={
+            'keyboard': {
+                'type': 'buttons',
+                'buttons': ['버튼1', '버튼2'],
+            },
+        },
+        text={
+            'message': text,
+        },
+        photo={
+            'message': {
+                'photo': photo,
+            },
+        },
+        message_button={
+            'message': {
+                'message_button': message_button,
+            },
+        },
+        full={
+            'message': {
+                **text,
+                'photo': photo,
+                'message_button': message_button,
+            },
+        },
+    )
+    data_instance = dict(
+        text=Text(**text),
+        photo=Photo(**photo),
+        message_button=MessageButton(**message_button),
+    )
+    request.cls.response = data_dict
+    request.cls.response_ins = data_instance
+
+
 @pytest.fixture(scope='module')
 def handler():
     handlers = {
