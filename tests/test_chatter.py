@@ -1,4 +1,3 @@
-import pytest
 from chatterbox import Chatter
 
 
@@ -13,7 +12,7 @@ class TestChatter:
         assert chatter is not None
 
     def test_handler_functions(self, handler):
-        assert type(handler) == dict
+        assert isinstance(handler, dict)
 
         for func_name in handler:
             assert callable(handler[func_name])
@@ -37,7 +36,7 @@ class TestChatter:
         assert chatter.rules is not None
         assert chatter.rules['자기소개_홈_소개'] is not None
 
-    def test_add_rule_decorator(self, handler):
+    def test_add_rule_decorator(self):
         chatter = Chatter()
 
         @chatter.rule(action='자기소개', src='홈', dest='소개')
