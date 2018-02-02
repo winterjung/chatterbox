@@ -1,6 +1,10 @@
 import pytest
 import json
-from chatterbox.response import Keyboard, Text, Photo, MessageButton, Message
+from itertools import combinations, chain, product, permutations
+from functools import reduce, partial
+from operator import add
+from chatterbox.response import (Keyboard, Text, Photo,
+                                 MessageButton, Message, Response)
 
 
 @pytest.mark.usefixtures('response_dict')
@@ -26,57 +30,46 @@ class TestResponse:
 
     def test_text(self):
         text = Text('안녕!')
-        assert self.response['text'] == text
+        assert isinstance(text, Text)
+        text_with_kwargs = Text(text='안녕!')
+        assert self.response['text'] == text == text_with_kwargs
 
     def test_photo(self):
         photo = Photo('https://photo.src', 640, 480)
+        assert isinstance(photo, Photo)
         photo_with_kwargs = Photo(url='https://photo.src',
                                   width=640,
                                   height=480)
         assert self.response['photo'] == photo == photo_with_kwargs
 
     def test_message_button(self):
-        message_button = MessageButton(label='안녕!',
-                                       url='https://button/url')
-        assert self.response['message_button'] == message_button
+        button = MessageButton('안녕!', 'https://button/url')
+        assert isinstance(button, MessageButton)
+        button_with_kwargs = MessageButton(label='안녕!',
+                                           url='https://button/url')
+        assert self.response['message_button'] == button == button_with_kwargs
 
     def test_message(self):
-        assert self.response_ins['text'] == Message(text='안녕!')
+        full = Message(text='안녕!',
+                       photo={
+                           'url': 'https://photo.src',
+                           'width': 640,
+                           'height': 480,
+                       },
+                       message_button={
+                           'label': '안녕!',
+                           'url': 'https://button/url',
+                       })
+        full_dict = self.response['full']
+        assert full_dict == full
+        assert full == Message(**full_dict['message'])
 
-        message_photo = Message(photo={
-                                    'url': 'https://photo.src',
-                                    'width': 640,
-                                    'height': 480,
-                                })
-        assert self.response_ins['photo'] == message_photo
-
-        message_button = Message(message_button={
-                                    'label': '안녕!',
-                                    'url': 'https://button/url',
-                                })
-        assert self.response_ins['message_button'] == message_button
-
-        message_full = Message(text='안녕!',
-                               photo={
-                                   'url': 'https://photo.src',
-                                   'width': 640,
-                                   'height': 480,
-                               },
-                               message_button={
-                                   'label': '안녕!',
-                                   'url': 'https://button/url',
-                               })
-        assert self.response['full'] == message_full
-        assert message_full == Message(**self.response['full']['message'])
-
-    def test_message_combination(self):
+    def test_message_combination_with_dict(self):
         text = self.response_ins['text']
         photo = self.response_ins['photo']
         button = self.response_ins['message_button']
-        message_full = Message(**self.response['full']['message'])
 
         assert text + photo + button == self.response['full']
-        assert text + photo + button == message_full
         assert text + photo == {
             'message': {
                 **self.response['text']['message'],
@@ -95,6 +88,22 @@ class TestResponse:
                 **self.response['message_button']['message']
             }
         }
+
+    def test_message_combination_with_instance(self):
+        text = self.response_ins['text']
+        photo = self.response_ins['photo']
+        button = self.response_ins['message_button']
+
+        messages = (text, photo, button)
+
+        repeats = range(1, len(messages)+1)
+        combination = (combinations(messages, r) for r in repeats)
+        flatten = chain(*combination)
+        adder = partial(reduce, add)
+        messages = map(adder, flatten)
+
+        for message in messages:
+            assert message == Message(**message['message'])
 
     def test_advanced_message_combination(self):
         text = self.response_ins['text']
