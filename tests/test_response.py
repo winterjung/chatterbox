@@ -21,12 +21,18 @@ class TestResponse:
         assert json.dumps(keyboard, ensure_ascii=False) == serialized
 
     def test_invalid_keyboard(self):
-        with pytest.raises(Exception):
+        with pytest.raises(TypeError) as excinfo:
             Keyboard(['버튼1'], type='text')
-        with pytest.raises(Exception):
+        assert 'buttons must be None' in str(excinfo.value)
+        with pytest.raises(TypeError) as excinfo:
             Keyboard('버튼1')
-        with pytest.raises(Exception):
+        assert 'buttons must be list' in str(excinfo.value)
+        with pytest.raises(TypeError) as excinfo:
             Keyboard(type='buttons')
+        assert 'buttons must be list' in str(excinfo.value)
+        with pytest.raises(TypeError) as excinfo:
+            Keyboard()
+        assert 'buttons must be list' in str(excinfo.value)
 
     def test_text(self):
         text = Text('안녕!')
