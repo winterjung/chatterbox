@@ -6,7 +6,7 @@ app = Flask(__name__)
 chatter = Chatter()
 
 
-@chatter.home(name='홈')
+@chatter.base(name='홈')
 def home_keyboard():
     home_buttons = ['자기소개', '사이트로 이동하기']
     return Keyboard(home_buttons)
@@ -34,7 +34,7 @@ def web(data):
     msg_button = MessageButton(label='이동하기',
                                url='https://github.com/jungwinter/chatterbox')
     keyboard = home_keyboard()
-    return Message(text=text, button=msg_button, keyboard=keyboard)
+    return Message(text=text, message_button=msg_button) + keyboard
 
 
 @chatter.rule(action='취소', src='*', dest='홈')
