@@ -1,4 +1,5 @@
 import pytest
+from chatterbox import Chatter
 from chatterbox import Keyboard, Text, Photo, MessageButton, Message
 
 
@@ -62,6 +63,31 @@ def response_dict(request):
     request.cls.response_ins = data_instance
 
 
+@pytest.fixture(scope='function')
+def chatter():
+    return Chatter()
+
+
+@pytest.fixture
+def registered_chatter(request, chatter, handler):
+    chatter.add_base('홈', handler['home_keyboard'])
+    chatter.add_rule('자기소개', '홈', '소개', handler['intro'])
+    chatter.add_rule('오늘의 날씨', '소개', '홈', handler['weather'])
+    chatter.add_rule('사이트로 이동하기', '홈', '홈', handler['web'])
+    chatter.add_rule('취소', '*', '홈', handler['cancel'])
+    request.cls.chatter = chatter
+
+
+@pytest.fixture
+def data():
+    data = {
+        'user_key': 'encryptedUserKey',
+        'type': 'text',
+        'content': None,
+    }
+    return data
+
+
 @pytest.fixture(scope='module')
 def handler():
     handlers = {
@@ -98,7 +124,7 @@ def web(data):
     msg_button = MessageButton(label='이동하기',
                                url='https://github.com/jungwinter/chatterbox')
     keyboard = home_keyboard()
-    return Message(text=text, button=msg_button, keyboard=keyboard)
+    return Message(text=text, message_button=msg_button) + keyboard
 
 
 def cancel(data):
