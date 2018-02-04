@@ -12,8 +12,8 @@ class TestChatterRoute:
         assert callable(self.chatter.rules['오늘의 날씨_소개_홈'])
         assert callable(self.chatter.rules['사이트로 이동하기_홈_홈'])
         assert callable(self.chatter.rules['취소_*_홈'])
-        assert self.chatter.base.name == '홈'
-        assert callable(self.chatter.base.func)
+        assert self.chatter.home.name == '홈'
+        assert callable(self.chatter.home)
 
     def test_valid_scenario(self, data):
         user_key = data['user_key']
@@ -74,7 +74,7 @@ class Asserter:
         return self
 
     def home(self):
-        home_keyboard = self.chatter.base.func()
+        home_keyboard = self.chatter.home()
         assert self.response['keyboard'] == home_keyboard['keyboard']
         return self
 

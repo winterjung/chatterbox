@@ -1,7 +1,7 @@
 class Chatter:
     def __init__(self):
         self.rules = {}
-        self.base = HomeBase()
+        self._home = HomeBase()
         self._memory = {}
 
     def add_rule(self, action, src, dest, func):
@@ -15,14 +15,18 @@ class Chatter:
         return decorator
 
     def add_base(self, name, func):
-        self.base.name = name
-        self.base.func = func
+        self._home.name = name
+        self._home.func = func
 
     def base(self, name):
         def decorator(func):
             self.add_base(name, func)
             return func
         return decorator
+
+    @property
+    def home(self):
+        return self._home
 
     def route(self, data):
         # TODO: valid check
@@ -31,7 +35,7 @@ class Chatter:
 
         # Default user setting
         if user_key not in self._memory:
-            src = self.base.name
+            src = self.home.name
             self._memory[user_key] = State(src)
 
         # Get src
@@ -96,3 +100,6 @@ class HomeBase:
 
     def __setitem__(self, name, value):
         setattr(self, name, value)
+
+    def __call__(self):
+        return self.func()
