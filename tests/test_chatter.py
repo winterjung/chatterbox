@@ -1,4 +1,7 @@
+import pytest
 from chatterbox import Chatter
+from chatterbox.chatter import State, HomeBase
+from chatterbox.response import Keyboard
 
 
 class TestChatter:
@@ -12,17 +15,11 @@ class TestChatter:
         for func_name in handler:
             assert callable(handler[func_name])
 
-    def test_add_rule_with_kwargs(self, chatter, handler):
+    def test_add_rule(self, chatter, handler):
         chatter.add_rule(action='자기소개',
                          src='홈',
                          dest='소개',
                          func=handler['intro'])
-
-        assert chatter.rules is not None
-        assert chatter.rules['자기소개_홈_소개'] is not None
-
-    def test_add_rule_without_kwargs(self, chatter, handler):
-        chatter.add_rule('자기소개', '홈', '소개', handler['intro'])
 
         assert chatter.rules is not None
         assert chatter.rules['자기소개_홈_소개'] is not None
@@ -34,3 +31,53 @@ class TestChatter:
 
         assert chatter.rules is not None
         assert chatter.rules['자기소개_홈_소개'] is not None
+
+    def test_add_base(self, chatter, handler):
+        chatter.add_base(name='홈', func=handler['home_keyboard'])
+
+        assert chatter.home.name == '홈'
+        assert callable(chatter.home.func)
+        assert isinstance(chatter.home(), Keyboard)
+        assert isinstance(chatter.home, HomeBase)
+
+    def test_add_base_decorator(self, chatter):
+        @chatter.base('홈')
+        def home_keyboard():
+            pass
+
+        assert chatter.home.name == '홈'
+        assert callable(chatter.home.func)
+
+
+class TestState:
+    def test_state(self):
+        state = State('홈')
+        assert state.current == '홈'
+        assert state.previous is None
+
+        state.move('자기소개')
+        assert state.current == '자기소개'
+        assert state.previous == '홈'
+
+    def test_invalid_state_init(self):
+        with pytest.raises(TypeError) as excinfo:
+            State()
+        assert 'required positional argument' in str(excinfo.value)
+
+
+class TestHomeBase:
+    def test_homebase_with_args(self):
+        def keyboard():
+            return Keyboard(['버튼'])
+        home = HomeBase('홈', keyboard)
+
+        assert home.name == '홈'
+        assert callable(home.func)
+        assert callable(home)
+        assert home() == home.func()
+
+    def test_homebase_without_args(self):
+        home = HomeBase()
+        home.name = '홈'
+        home.func = lambda: Keyboard(['버튼'])
+        assert home() == home.func()

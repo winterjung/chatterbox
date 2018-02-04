@@ -1,5 +1,4 @@
 import pytest
-import logging
 from chatterbox.response import Response
 
 
@@ -17,7 +16,7 @@ class TestChatterRoute:
 
     def test_valid_scenario(self, data):
         user_key = data['user_key']
-        check = Checker().chatter(self.chatter).user(user_key)
+        check = Checker().init(self.chatter).user(user_key)
         check_text = check.msg(['text'])
         check_home = check_text.dest('홈').home()
 
@@ -47,7 +46,7 @@ class TestChatterRoute:
 
 
 class Asserter:
-    def chatter(self, chatter):
+    def init(self, chatter):
         self.chatter = chatter
         return self
 
