@@ -59,6 +59,58 @@ class TestChatterRoute:
             self.chatter.route(data)
         assert 'there is no matching function' in str(excinfo.value)
 
+    def test_input_scenario(self, chatter, data):
+        check = Checker().init(chatter).user(data['user_key'])
+        assert chatter.rules == {}
+
+        chatter.add_base('홈', lambda: Keyboard(['숫자 맞추기']))
+
+        @chatter.rule('숫자 맞추기', '홈', '홈')
+        def guess(data):
+            message = '숫자 맞추기를 시작합니다.'
+            while True:
+                data = yield Text(message) + Keyboard(type='text')
+
+                answer = data['content']
+                if answer == '42':
+                    break
+                message = '틀렸습니다.'
+
+            message = '맞았습니다.'
+            return Text(message) + chatter.home()
+
+        assert callable(chatter.rules['숫자 맞추기_홈_홈'])
+
+        data['content'] = '숫자 맞추기'
+        res = chatter.route(data)
+        (check
+            .src('홈')
+            .dest('__waiting_input')
+            .msg('text')
+            .contain('시작합니다')
+            .keyboard('text')
+            .do(res))
+
+        data['content'] = '21'
+        res = chatter.route(data)
+        (check
+            .src('홈')
+            .dest('__waiting_input')
+            .msg('text')
+            .contain('틀렸습니다')
+            .keyboard('text')
+            .do(res))
+
+        data['content'] = '42'
+        res = chatter.route(data)
+        (check
+            .src('__waiting_input')
+            .dest('홈')
+            .msg('text')
+            .contain('맞았습니다')
+            .home()
+            .do(res))
+
 
 class Asserter:
     def init(self, chatter):
