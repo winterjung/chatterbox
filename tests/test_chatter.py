@@ -1,6 +1,5 @@
-import pytest
 from chatterbox import Chatter
-from chatterbox.chatter import State, HomeBase
+from chatterbox.chatter import HomeBase
 from chatterbox.response import Keyboard
 
 
@@ -47,22 +46,6 @@ class TestChatter:
 
         assert chatter.home.name == '홈'
         assert callable(chatter.home.func)
-
-
-class TestState:
-    def test_state(self):
-        state = State('홈')
-        assert state.current == '홈'
-        assert state.previous is None
-
-        state.move('자기소개')
-        assert state.current == '자기소개'
-        assert state.previous == '홈'
-
-    def test_invalid_state_init(self):
-        with pytest.raises(TypeError) as excinfo:
-            State()
-        assert 'required positional argument' in str(excinfo.value)
 
 
 class TestHomeBase:

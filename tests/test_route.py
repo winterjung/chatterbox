@@ -127,11 +127,11 @@ class Asserter:
         return self
 
     def src(self, src):
-        assert self.chatter.previous_state(self.user_key) == src
+        assert self.chatter.user(self.user_key).previous == src
         return self
 
     def dest(self, dest):
-        assert self.chatter.current_state(self.user_key) == dest
+        assert self.chatter.user(self.user_key).current == dest
         return self
 
     def msg(self, messages):
