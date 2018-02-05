@@ -1,4 +1,5 @@
 from types import GeneratorType
+
 from chatterbox.memory import DictionaryMemory
 
 
