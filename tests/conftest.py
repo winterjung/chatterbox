@@ -1,6 +1,7 @@
 import pytest
+
 from chatterbox import Chatter
-from chatterbox import Keyboard, Text, Photo, MessageButton, Message
+from chatterbox.response import Keyboard, Message, MessageButton, Photo, Text
 
 
 @pytest.fixture(scope='class')

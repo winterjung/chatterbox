@@ -1,5 +1,6 @@
 import pytest
-from chatterbox.response import Response, Text, Keyboard
+
+from chatterbox.response import Keyboard, Response, Text
 
 
 @pytest.mark.usefixtures('registered_chatter')

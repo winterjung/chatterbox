@@ -1,10 +1,12 @@
-import pytest
 import json
-from itertools import combinations, chain, product, permutations
-from functools import reduce, partial
+from functools import partial, reduce
+from itertools import chain, combinations, permutations, product
 from operator import add
-from chatterbox.response import (Keyboard, Text, Photo,
-                                 MessageButton, Message, Response)
+
+import pytest
+
+from chatterbox.response import (Keyboard, Message, MessageButton, Photo,
+                                 Response, Text)
 
 
 @pytest.mark.usefixtures('response_dict')
