@@ -1,8 +1,14 @@
+from types import GeneratorType
+from chatterbox.memory import DictionaryMemory
+
+
 class Chatter:
-    def __init__(self):
+    WAITING_STATE = '__waiting_input'
+
+    def __init__(self, memory=DictionaryMemory):
         self.rules = {}
         self._home = HomeBase()
-        self._memory = {}
+        self._memory = memory()
 
     def add_rule(self, action, src, dest, func):
         rule_name = '{}_{}_{}'.format(action, src, dest)
@@ -29,85 +35,78 @@ class Chatter:
         return self._home
 
     def route(self, data):
-        # TODO: valid check
         user_key = data['user_key']
         action = data['content']
+        user = self.user(user_key)
 
-        # Default user setting
-        if user_key not in self._memory:
-            src = self.home.name
-            self._memory[user_key] = State(src)
+        current_state = user.current
 
-        # Get src
-        src = self.current_state(user_key)
-        if src == '__waiting_input':
-            gen = self._memory[user_key].context['generator']
-            try:
-                response = gen.send(data)
-            except StopIteration as excinfo:
-                response = excinfo.value
-                self._memory[user_key].move(self._memory[user_key].context['destination'])
-                return response
-        else:
-            # Search rule
-            rule_name = '{}_{}_'.format(action, src)
+        if self._is_waiting_state(current_state):
+            # Side effect
+            response = self._get_response_from_generator(user, data)
+            return response
 
-            dest = None
-            func = None
-            for key in self.rules:
-                if key.startswith(rule_name):
-                    dest = key.replace(rule_name, '')
-                    func = self.rules[key]
+        rule_name = self._find_rule_name(action, current_state)
 
-            # Search when src is *
-            if func is None:
-                rule_name = '{}_*_'.format(action)
-                for key in self.rules:
-                    if key.startswith(rule_name):
-                        dest = key.replace(rule_name, '')
-                        func = self.rules[key]
+        dest = self._extract_dest(rule_name)
+        func = self._finc_handle_func(rule_name)
 
-            # Not match
-            if func is None:
-                raise ValueError('there is no matching function')
-            # Execute function
-            response = func(data)
-            # self._memory[user_key].move(dest)
+        response = func(data)
 
-            # Check coroutine
-            if isinstance(response, GeneratorType):
-                gen = response
-                response = gen.send(None)
-                self._memory[user_key].context = {
-                    'generator': gen,
-                    'destination': dest
-                }
-                dest = '__waiting_input'
-                # self._memory[user_key].move(dest)
+        if isinstance(response, GeneratorType):
+            gen = response
+            response = gen.send(None)
+            # user.update_context(gen=response, dest=dest)
+            user.context = {
+                'generator': gen,
+                'destination': dest,
+            }
+            dest = self.WAITING_STATE
 
-            # Update state
-            self._memory[user_key].move(dest)
-
+        user.move(dest)
         return response
 
-    def previous_state(self, user_key):
-        # TODO: check exist
-        return self._memory[user_key].previous
+    def _is_waiting_state(self, state):
+        return state == self.WAITING_STATE
 
-    def current_state(self, user_key):
-        # TODO: check exist
-        return self._memory[user_key].current
+    def _get_response_from_generator(self, user, data):
+        context = user.context
+        gen = context['generator']
+        dest = context['destination']
 
+        try:
+            response = gen.send(data)
+            user.context['generator'] = gen  # Side effect
+            # user.update_context(gen=gen)
+        except StopIteration as excinfo:
+            response = excinfo.value
+            user.move(dest)  # Side effect
+        return response
 
-class State:
-    def __init__(self, current_state):
-        self.previous = None
-        self.current = current_state
+    def _find_rule_name(self, action, current_state):
+        rule_name = '{}_{}_'.format(action, current_state)
+        for name in self.rules:
+            if name.startswith(rule_name):
+                return name
 
-    def move(self, dest):
-        self.previous = self.current
-        self.current = dest
-        return self
+        if current_state == '*':
+            raise ValueError('there is no matching function')
+
+        name = self._find_rule_name(action, '*')
+        return name
+
+    def _finc_handle_func(self, rule_name):
+        func = self.rules[rule_name]
+        return func
+
+    def _extract_dest(self, rule_name):
+        return rule_name.split('_')[-1]
+
+    def user(self, user_key):
+        user = self._memory.user(user_key)
+        if user is None:
+            user = self._memory.create(user_key, self.home.name)
+        return user
 
 
 class HomeBase:
