@@ -1,5 +1,5 @@
 import pytest
-from chatterbox.response import Response
+from chatterbox.response import Response, Text, Keyboard
 
 
 @pytest.mark.usefixtures('registered_chatter')
@@ -17,26 +17,41 @@ class TestChatterRoute:
     def test_valid_scenario(self, data):
         user_key = data['user_key']
         check = Checker().init(self.chatter).user(user_key)
-        check_text = check.msg(['text'])
+        check_text = check.msg('text').keyboard('buttons')
         check_home = check_text.dest('홈').home()
 
         data['content'] = '자기소개'
         res = self.chatter.route(data)
-        check_text.src('홈').dest('소개').do(res)
+        (check_text
+            .src('홈')
+            .dest('소개')
+            .contain('도와드릴까요?')
+            .do(res))
 
         data['content'] = '오늘의 날씨'
         res = self.chatter.route(data)
-        check_home.src('소개').msg(['photo']).do(res)
+        (check_home
+            .src('소개')
+            .msg('photo')
+            .contain('맑겠습니다')
+            .do(res))
 
         data['content'] = '사이트로 이동하기'
         res = self.chatter.route(data)
-        check_home.src('홈').msg(['message_button']).do(res)
+        (check_home
+            .src('홈')
+            .msg('message_button')
+            .contain('사이트로 이동')
+            .do(res))
 
         data['content'] = '자기소개'
         res = self.chatter.route(data)
         data['content'] = '취소'
         res = self.chatter.route(data)
-        check_home.src('소개').do(res)
+        (check_home
+            .src('소개')
+            .contain('취소하셨습니다')
+            .do(res))
 
     def test_invalid_content(self, data):
         with pytest.raises(ValueError) as excinfo:
@@ -68,6 +83,8 @@ class Asserter:
         return self
 
     def msg(self, messages):
+        if isinstance(messages, str):
+            messages = [messages]
         for msg in messages:
             assert msg in self.response['message']
         return self
@@ -75,6 +92,24 @@ class Asserter:
     def home(self):
         home_keyboard = self.chatter.home()
         assert self.response['keyboard'] == home_keyboard['keyboard']
+        return self
+
+    def keyboard(self, keyboard_type):
+        assert self.response['keyboard']['type'] == keyboard_type
+        return self
+
+    def contain(self, target):
+        msg = self.response['message']
+        text = msg.get('text', '')
+        photo = msg.get('photo', {})
+        button = msg.get('message_button', {})
+
+        in_text = target in text
+        in_photo = target in photo.get('url', '')
+        in_button_label = target in button.get('label', '')
+        in_button_url = target in button.get('url', '')
+
+        assert any([in_text, in_photo, in_button_label, in_button_url])
         return self
 
 
