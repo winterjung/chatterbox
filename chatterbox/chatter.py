@@ -40,33 +40,53 @@ class Chatter:
 
         # Get src
         src = self.current_state(user_key)
+        if src == '__waiting_input':
+            gen = self._memory[user_key].context['generator']
+            try:
+                response = gen.send(data)
+            except StopIteration as excinfo:
+                response = excinfo.value
+                self._memory[user_key].move(self._memory[user_key].context['destination'])
+                return response
+        else:
+            # Search rule
+            rule_name = '{}_{}_'.format(action, src)
 
-        # Search rule
-        rule_name = '{}_{}_'.format(action, src)
-        dest = None
-        func = None
-        for key in self.rules:
-            if key.startswith(rule_name):
-                dest = key.replace(rule_name, '')
-                func = self.rules[key]
-
-        # Search when src is *
-        if func is None:
-            rule_name = '{}_*_'.format(action)
+            dest = None
+            func = None
             for key in self.rules:
                 if key.startswith(rule_name):
                     dest = key.replace(rule_name, '')
                     func = self.rules[key]
 
-        # Not match
-        if func is None:
-            raise ValueError('there is no matching function')
-        # Execute function
-        response = func(data)
-        # TODO: check coroutine
+            # Search when src is *
+            if func is None:
+                rule_name = '{}_*_'.format(action)
+                for key in self.rules:
+                    if key.startswith(rule_name):
+                        dest = key.replace(rule_name, '')
+                        func = self.rules[key]
 
-        # Update state
-        self._memory[user_key].move(dest)
+            # Not match
+            if func is None:
+                raise ValueError('there is no matching function')
+            # Execute function
+            response = func(data)
+            # self._memory[user_key].move(dest)
+
+            # Check coroutine
+            if isinstance(response, GeneratorType):
+                gen = response
+                response = gen.send(None)
+                self._memory[user_key].context = {
+                    'generator': gen,
+                    'destination': dest
+                }
+                dest = '__waiting_input'
+                # self._memory[user_key].move(dest)
+
+            # Update state
+            self._memory[user_key].move(dest)
 
         return response
 
