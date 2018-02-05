@@ -25,20 +25,26 @@ class Response(dict):
 
 class Message(Response):
     def __init__(self, text=None, photo=None, message_button=None):
-        self._text = text
-        self._photo = photo
-        self._message_button = message_button
+        self._mapping = {
+            'text': text,
+            'photo': photo,
+            'message_button': message_button,
+        }
 
         message_dict = dict()
 
-        if self._text:
-            message_dict['text'] = self._text
-        if self._photo:
-            message_dict['photo'] = self._photo
-        if self._message_button:
-            message_dict['message_button'] = self._message_button
+        for category, msg in self._mapping.items():
+            if msg is None:
+                continue
+            msg = self._unpack(msg, category)
+            message_dict[category] = msg
 
         super().__init__(message=message_dict)
+
+    def _unpack(self, message, category):
+        if isinstance(message, Message):
+            message = message['message'][category]
+        return message
 
     def __add__(self, other):
         if isinstance(other, Keyboard):
