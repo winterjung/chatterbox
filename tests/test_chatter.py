@@ -20,16 +20,40 @@ class TestChatter:
                          dest='소개',
                          func=handler['intro'])
 
-        assert chatter.rules is not None
-        assert chatter.rules['자기소개_홈_소개'] is not None
+        rule = chatter.rules.action('자기소개').one()
+        assert rule is not None
+        assert rule.src == '홈'
+        assert rule.dest == '소개'
+        assert callable(rule.func)
 
     def test_add_rule_decorator(self, chatter):
         @chatter.rule(action='자기소개', src='홈', dest='소개')
         def intro(data):
             pass
 
-        assert chatter.rules is not None
-        assert chatter.rules['자기소개_홈_소개'] is not None
+        rule = chatter.rules.action('자기소개').one()
+        assert rule is not None
+        assert rule.src == '홈'
+        assert rule.dest == '소개'
+        assert callable(rule.func)
+
+    def test_add_rule_multiple_action(self, chatter, handler):
+        actions = ['자기소개', '소개하기', '안내']
+        chatter.add_rule(action=actions,
+                         src='홈',
+                         dest='소개',
+                         func=handler['intro'])
+
+        rule = chatter.rules.action('자기소개').src('홈').first()
+        assert rule.dest == '소개'
+        assert callable(rule.func)
+
+        rules = chatter.rules.src('홈').dest('소개').all()
+        for rule in rules:
+            assert rule.action in actions
+
+        funcs = [rule.func for rule in rules]
+        assert len(set(funcs)) == 1
 
     def test_add_base(self, chatter, handler):
         chatter.add_base(name='홈', func=handler['home_keyboard'])

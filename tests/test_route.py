@@ -1,20 +1,11 @@
 import pytest
 
 from chatterbox.response import Keyboard, Response, Text
+from chatterbox.utils import listify
 
 
 @pytest.mark.usefixtures('registered_chatter')
 class TestChatterRoute:
-    def test_initialized_chatter(self):
-        assert self.chatter is not None
-        assert len(self.chatter.rules) > 0
-        assert callable(self.chatter.rules['자기소개_홈_소개'])
-        assert callable(self.chatter.rules['오늘의 날씨_소개_홈'])
-        assert callable(self.chatter.rules['사이트로 이동하기_홈_홈'])
-        assert callable(self.chatter.rules['취소_*_홈'])
-        assert self.chatter.home.name == '홈'
-        assert callable(self.chatter.home)
-
     def test_valid_scenario(self, data):
         user_key = data['user_key']
         check = Checker().init(self.chatter).user(user_key)
@@ -62,8 +53,6 @@ class TestChatterRoute:
 
     def test_input_scenario(self, chatter, data):
         check = Checker().init(chatter).user(data['user_key'])
-        assert chatter.rules == {}
-
         chatter.add_base('홈', lambda: Keyboard(['숫자 맞추기']))
 
         @chatter.rule('숫자 맞추기', '홈', '홈')
@@ -80,7 +69,7 @@ class TestChatterRoute:
             message = '맞았습니다.'
             return Text(message) + chatter.home()
 
-        assert callable(chatter.rules['숫자 맞추기_홈_홈'])
+        assert callable(chatter.rules.action('숫자 맞추기').first().func)
 
         data['content'] = '숫자 맞추기'
         res = chatter.route(data)
