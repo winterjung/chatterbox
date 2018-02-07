@@ -1,13 +1,15 @@
-from types import GeneratorType
+from inspect import isgeneratorfunction
 
 from chatterbox.memory import DictionaryMemory
+from chatterbox.rule import RuleBook
+from chatterbox.utils import listify
 
 
 class Chatter:
     WAITING_STATE = '__waiting_input'
 
     def __init__(self, memory='dict'):
-        self.rules = {}
+        self.rules = RuleBook()
         self.home = HomeBase()
         self.memory = self._lookup_memory(memory)()
 
@@ -18,8 +20,9 @@ class Chatter:
         return table[memory]
 
     def add_rule(self, action, src, dest, func):
-        rule_name = '{}_{}_{}'.format(action, src, dest)
-        self.rules[rule_name] = func
+        actions = listify(action)
+        for act in actions:
+            self.rules.add_rule(act, src, dest, func)
 
     def rule(self, action, src, dest):
         def decorator(func):
@@ -52,20 +55,18 @@ class Chatter:
             response = self._get_response_from_generator(user, data)
             return response
 
-        rule_name = self._find_rule_name(action, current_state)
+        rule = self._find_rule(action, current_state)
 
-        dest = self._extract_dest(rule_name)
-        func = self._finc_handle_func(rule_name)
-
-        response = func(data)
-
-        if isinstance(response, GeneratorType):
-            gen = response
+        if isgeneratorfunction(rule.func):
+            gen = rule.func(data)
             response = gen.send(None)
 
             user.context.generator = gen
             user.context.destination = rule.dest
             dest = self.WAITING_STATE
+        else:
+            response = rule.func(data)
+            dest = rule.dest
 
         user.move(dest)
         self._save_state(user)
@@ -91,30 +92,13 @@ class Chatter:
             self._save_state(user)
         return response
 
-    def _find_rule_name(self, action, current_state):
-        rule_name = '{}_{}_'.format(action, current_state)
-        for name in self.rules:
-            if name.startswith(rule_name):
-                return name
-
-        if current_state == '*':
+    def _find_rule(self, action, current_state):
+        rule = self.rules.action(action).src(current_state).first()
+        if rule is None:
+            rule = self.rules.action(action).src('*').first()
+        if rule is None:
             raise ValueError('there is no matching function')
-
-        name = self._find_rule_name(action, '*')
-        return name
-
-    def _finc_handle_func(self, rule_name):
-        func = self.rules[rule_name]
-        return func
-
-    def _extract_dest(self, rule_name):
-        return rule_name.split('_')[-1]
-
-    def user(self, user_key):
-        user = self._memory.user(user_key)
-        if user is None:
-            user = self._memory.create(user_key, self.home.name)
-        return user
+        return rule
 
 
 class HomeBase:
