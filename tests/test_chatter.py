@@ -76,7 +76,8 @@ class TestHomeBase:
     def test_homebase_with_args(self):
         def keyboard():
             return Keyboard(['버튼'])
-        home = HomeBase('홈', keyboard)
+        home = HomeBase()
+        home.register('홈', keyboard)
 
         assert home.name == '홈'
         assert callable(home.func)

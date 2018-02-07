@@ -125,9 +125,7 @@ class Asserter:
         return self
 
     def msg(self, messages):
-        if isinstance(messages, str):
-            messages = [messages]
-        for msg in messages:
+        for msg in listify(messages):
             assert msg in self.response['message']
         return self
 
