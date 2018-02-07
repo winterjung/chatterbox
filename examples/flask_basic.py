@@ -24,7 +24,7 @@ def weather(data):
     text = Text('오늘은 하루종일 맑겠습니다.')
     sunny_image_url = 'http://images.all-free-download.com/images/graphiclarge/sunny_lawn_hd_picture_165992.jpg'
     photo = Photo(url=sunny_image_url, width=600, height=401)
-    keyboard = home_keyboard()
+    keyboard = chatter.home()
     return text + photo + keyboard
 
 
@@ -33,19 +33,19 @@ def web(data):
     text = Text('자세한 정보를 보고싶으면 사이트로 이동해주세요!')
     msg_button = MessageButton(label='이동하기',
                                url='https://github.com/jungwinter/chatterbox')
-    keyboard = home_keyboard()
+    keyboard = chatter.home()
     return Message(text=text, message_button=msg_button) + keyboard
 
 
 @chatter.rule(action='취소', src='*', dest='홈')
 def cancel(data):
     message = '취소하셨습니다.'
-    return Text(message) + home_keyboard()
+    return Text(message) + chatter.home()
 
 
 @app.route('/keyboard', methods=['GET'])
 def keyboard():
-    return jsonify(home_keyboard())
+    return jsonify(chatter.home())
 
 
 @app.route('/message', methods=['POST'])
