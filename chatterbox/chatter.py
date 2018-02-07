@@ -28,8 +28,7 @@ class Chatter:
         return decorator
 
     def add_base(self, name, func):
-        self._home.name = name
-        self._home.func = func
+        self.home.register(name, func)
 
     def base(self, name):
         def decorator(func):
@@ -37,9 +36,11 @@ class Chatter:
             return func
         return decorator
 
-    @property
-    def home(self):
-        return self._home
+    def user(self, user_key):
+        user = self.memory.user(user_key)
+        if user is None:
+            user = self.memory.create(user_key, self.home.name)
+        return user
 
     def route(self, data):
         user_key = data['user_key']
@@ -117,9 +118,13 @@ class Chatter:
 
 
 class HomeBase:
-    def __init__(self, name=None, func=None):
-        self.name = name
-        self.func = func
+    def __init__(self):
+        self.name = None
+        self.func = None
 
     def __call__(self):
         return self.func()
+
+    def register(self, name=None, func=None):
+        self.name = name
+        self.func = func
