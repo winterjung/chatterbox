@@ -6,10 +6,16 @@ from chatterbox.memory import DictionaryMemory
 class Chatter:
     WAITING_STATE = '__waiting_input'
 
-    def __init__(self, memory=DictionaryMemory):
+    def __init__(self, memory='dict'):
         self.rules = {}
-        self._home = HomeBase()
-        self._memory = memory()
+        self.home = HomeBase()
+        self.memory = self._lookup_memory(memory)()
+
+    def _lookup_memory(self, memory):
+        table = {
+            'dict': DictionaryMemory,
+        }
+        return table[memory]
 
     def add_rule(self, action, src, dest, func):
         rule_name = '{}_{}_{}'.format(action, src, dest)
@@ -39,11 +45,9 @@ class Chatter:
         user_key = data['user_key']
         action = data['content']
         user = self.user(user_key)
-
         current_state = user.current
 
         if self._is_waiting_state(current_state):
-            # Side effect
             response = self._get_response_from_generator(user, data)
             return response
 
@@ -57,31 +61,33 @@ class Chatter:
         if isinstance(response, GeneratorType):
             gen = response
             response = gen.send(None)
-            # user.update_context(gen=response, dest=dest)
-            user.context = {
-                'generator': gen,
-                'destination': dest,
-            }
+
+            user.context.generator = gen
+            user.context.destination = rule.dest
             dest = self.WAITING_STATE
 
         user.move(dest)
+        self._save_state(user)
         return response
+
+    def _save_state(self, user):
+        self.memory.save(user)
 
     def _is_waiting_state(self, state):
         return state == self.WAITING_STATE
 
     def _get_response_from_generator(self, user, data):
-        context = user.context
-        gen = context['generator']
-        dest = context['destination']
+        gen = user.context.generator
+        dest = user.context.destination
 
         try:
             response = gen.send(data)
-            user.context['generator'] = gen  # Side effect
-            # user.update_context(gen=gen)
+            user.context.generator = gen
+            self._save_state(user)
         except StopIteration as excinfo:
             response = excinfo.value
-            user.move(dest)  # Side effect
+            user.move(dest)
+            self._save_state(user)
         return response
 
     def _find_rule_name(self, action, current_state):
