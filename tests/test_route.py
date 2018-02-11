@@ -117,11 +117,15 @@ class Asserter:
         return self
 
     def src(self, src):
-        assert self.chatter.user(self.user_key).previous == src
+        user = self.chatter.memory.user(self.user_key)
+        if user is not None:
+            assert user.previous == src
         return self
 
     def dest(self, dest):
-        assert self.chatter.user(self.user_key).current == dest
+        user = self.chatter.memory.user(self.user_key)
+        if user is not None:
+            assert user.current == dest
         return self
 
     def msg(self, messages):
