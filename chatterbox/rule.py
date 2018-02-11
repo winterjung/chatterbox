@@ -28,7 +28,6 @@ class RuleBook:
         return RuleBook(rules=self._filter('action', name))
 
     def src(self, name):
-        new_rule_book = []
         return RuleBook(rules=self._filter('src', name))
 
     def dest(self, name):
