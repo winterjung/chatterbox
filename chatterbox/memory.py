@@ -29,6 +29,9 @@ class DictionaryMemory(BaseMemory):
     def save(self, user):
         self.user_list[user.user_key] = user
 
+    def delete(self, user):
+        del self.user_list[user.user_key]
+
 
 class User:
     def __init__(self, user_key, current=None):

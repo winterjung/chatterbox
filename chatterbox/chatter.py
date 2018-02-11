@@ -11,7 +11,11 @@ class Chatter:
     def __init__(self, memory='dict'):
         self.rules = RuleBook()
         self.home = HomeBase()
-        self.memory = self._lookup_memory(memory)()
+        try:
+            memory_type = self._lookup_memory(memory)
+        except KeyError:
+            raise KeyError('Unsupported memory type: {}'.format(memory))
+        self.memory = memory_type()
 
     def _lookup_memory(self, memory):
         table = {
@@ -69,10 +73,19 @@ class Chatter:
             dest = rule.dest
 
         user.move(dest)
-        self._save_state(user)
+        self._update_user(user)
         return response
 
-    def _save_state(self, user):
+    def _update_user(self, user):
+        if user.current == self.home.name:
+            self._delete_user(user)
+        else:
+            self._save_user(user)
+
+    def _delete_user(self, user):
+        self.memory.delete(user)
+
+    def _save_user(self, user):
         self.memory.save(user)
 
     def _is_waiting_state(self, state):
@@ -85,11 +98,10 @@ class Chatter:
         try:
             response = gen.send(data)
             user.context.generator = gen
-            self._save_state(user)
         except StopIteration as excinfo:
             response = excinfo.value
             user.move(dest)
-            self._save_state(user)
+        self._update_user(user)
         return response
 
     def _find_rule(self, action, current_state):
