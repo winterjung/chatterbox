@@ -11,8 +11,8 @@ setup(
     url='https://github.com/JungWinter/chatterbox',
     packages=find_packages(exclude=('tests', 'examples', 'concept')),
     py_modules=['chatterbox'],
-    install_requires=[],
-    tests_require=["pytest", "pylint", "tox", "pytest-cov"],
+    install_requires=['redis'],
+    tests_require=['pytest' 'pylint', 'tox', 'pytest-cov'],
     include_package_data=True,
     license='MIT'
 )

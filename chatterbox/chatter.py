@@ -1,6 +1,6 @@
 from inspect import isgeneratorfunction
 
-from chatterbox.memory import DictionaryMemory
+from chatterbox.memory import DictionaryMemory, RedisMemory
 from chatterbox.rule import RuleBook
 from chatterbox.utils import listify
 
@@ -20,6 +20,7 @@ class Chatter:
     def _lookup_memory(self, memory):
         table = {
             'dict': DictionaryMemory,
+            'redis': RedisMemory,
         }
         return table[memory]
 
