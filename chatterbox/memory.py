@@ -1,4 +1,6 @@
 import abc
+import json
+from types import SimpleNamespace
 
 
 class BaseMemory(metaclass=abc.ABCMeta):
@@ -12,6 +14,10 @@ class BaseMemory(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def save(self, user):
+        pass
+
+    @abc.abstractmethod
+    def delete(self, user):
         pass
 
 
@@ -33,20 +39,21 @@ class DictionaryMemory(BaseMemory):
         del self.user_list[user.user_key]
 
 
-class User:
-    def __init__(self, user_key, current=None):
+class User(SimpleNamespace):
+    def __init__(self, user_key, current=None, previous=None):
         self.user_key = user_key
-        self.previous = None
+        self.previous = previous
         self.current = current
-        self.context = Context()
 
     def move(self, dest):
         self.previous = self.current
         self.current = dest
         return self
 
+    def to_json(self):
+        return json.dumps(self.__dict__)
 
-class Context:
-    def __init__(self):
-        self.generator = None
-        self.destination = None
+    @classmethod
+    def from_json(cls, obj):
+        user = User(**json.loads(obj))
+        return user
