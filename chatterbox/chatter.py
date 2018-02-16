@@ -1,4 +1,4 @@
-from inspect import isgeneratorfunction
+from functools import wraps
 
 from chatterbox.memory import DictionaryMemory
 from chatterbox.rule import RuleBook
@@ -6,8 +6,6 @@ from chatterbox.utils import listify
 
 
 class Chatter:
-    WAITING_STATE = '__waiting_input'
-
     def __init__(self, memory='dict'):
         self.rules = RuleBook()
         self.home = HomeBase()
@@ -23,15 +21,25 @@ class Chatter:
         }
         return table[memory]
 
-    def add_rule(self, action, src, dest, func):
+    def add_rule(self, action=None, src=None, dest=None, func=None):
+        @wraps(func)
+        def wrapper(data):
+            result = func(data)
+            user = self.user(data['user_key'], False)
+            if dest is not None:
+                user.move(dest)
+                self._update_user(user)
+            return result
+
         actions = listify(action)
         for act in actions:
-            self.rules.add_rule(act, src, dest, func)
+            self.rules.add_rule(act, src, dest, wrapper)
+        return wrapper
 
-    def rule(self, action, src, dest):
+    def rule(self, action=None, src=None, dest=None):
         def decorator(func):
-            self.add_rule(action, src, dest, func)
-            return func
+            wrapper_func = self.add_rule(action, src, dest, func)
+            return wrapper_func
         return decorator
 
     def add_base(self, name, func):
@@ -43,9 +51,9 @@ class Chatter:
             return func
         return decorator
 
-    def user(self, user_key):
+    def user(self, user_key, create_when_not_exist=True):
         user = self.memory.user(user_key)
-        if user is None:
+        if user is None and create_when_not_exist:
             user = self.memory.create(user_key, self.home.name)
         return user
 
@@ -55,25 +63,9 @@ class Chatter:
         user = self.user(user_key)
         current_state = user.current
 
-        if self._is_waiting_state(current_state):
-            response = self._get_response_from_generator(user, data)
-            return response
-
         rule = self._find_rule(action, current_state)
+        response = rule.func(data)
 
-        if isgeneratorfunction(rule.func):
-            gen = rule.func(data)
-            response = gen.send(None)
-
-            user.context.generator = gen
-            user.context.destination = rule.dest
-            dest = self.WAITING_STATE
-        else:
-            response = rule.func(data)
-            dest = rule.dest
-
-        user.move(dest)
-        self._update_user(user)
         return response
 
     def _update_user(self, user):
@@ -88,24 +80,10 @@ class Chatter:
     def _save_user(self, user):
         self.memory.save(user)
 
-    def _is_waiting_state(self, state):
-        return state == self.WAITING_STATE
-
-    def _get_response_from_generator(self, user, data):
-        gen = user.context.generator
-        dest = user.context.destination
-
-        try:
-            response = gen.send(data)
-            user.context.generator = gen
-        except StopIteration as excinfo:
-            response = excinfo.value
-            user.move(dest)
-        self._update_user(user)
-        return response
-
     def _find_rule(self, action, current_state):
         rule = self.rules.action(action).src(current_state).first()
+        if rule is None:
+            rule = self.rules.action('*').src(current_state).first()
         if rule is None:
             rule = self.rules.action(action).src('*').first()
         if rule is None:
