@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from chatterbox.utils import listify
 
 
@@ -50,7 +52,7 @@ class RuleBook:
         return self._rules[:]
 
 
-class Rule:
+class Rule(SimpleNamespace):
     def __init__(self, action, src, dest, func):
         self.action = action
         self.src = src
