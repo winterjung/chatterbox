@@ -51,31 +51,44 @@ class TestChatterRoute:
             self.chatter.route(data)
         assert 'there is no matching function' in str(excinfo.value)
 
-    def test_input_scenario(self, chatter, data):
+    def test_endless_input_scenario(self, chatter, data):
         check = Checker().init(chatter).user(data['user_key'])
         chatter.add_base('홈', lambda: Keyboard(['숫자 맞추기']))
 
-        @chatter.rule('숫자 맞추기', '홈', '홈')
+        @chatter.rule('숫자 맞추기', '홈', '맞추는중')
         def guess(data):
             message = '숫자 맞추기를 시작합니다.'
-            while True:
-                data = yield Text(message) + Keyboard(type='text')
+            return Text(message) + Keyboard(type='text')
 
-                answer = data['content']
-                if answer == '42':
-                    break
-                message = '틀렸습니다.'
+        @chatter.rule(action='*', src='맞추는중')
+        def decide(data):
+            answer = data['content']
 
-            message = '맞았습니다.'
-            return Text(message) + chatter.home()
+            if answer == '42':
+                response = correct(data)
+            else:
+                response = try_again(data)
+            return response
 
-        assert callable(chatter.rules.action('숫자 맞추기').first().func)
+        @chatter.rule(dest='홈')
+        def correct(data):
+            text = Text('맞았습니다!')
+            return text + chatter.home()
+
+        @chatter.rule(dest='맞추는중')
+        def try_again(data):
+            text = Text('틀렸습니다.')
+            keyboard = Keyboard(type='text')
+            return text + keyboard
+
+        assert chatter.rules.action('숫자 맞추기').one() is not None
+        assert chatter.rules.src('맞추는중').one() is not None
 
         data['content'] = '숫자 맞추기'
         res = chatter.route(data)
         (check
             .src('홈')
-            .dest('__waiting_input')
+            .dest('맞추는중')
             .msg('text')
             .contain('시작합니다')
             .keyboard('text')
@@ -84,8 +97,8 @@ class TestChatterRoute:
         data['content'] = '21'
         res = chatter.route(data)
         (check
-            .src('홈')
-            .dest('__waiting_input')
+            .src('맞추는중')
+            .dest('맞추는중')
             .msg('text')
             .contain('틀렸습니다')
             .keyboard('text')
@@ -94,7 +107,7 @@ class TestChatterRoute:
         data['content'] = '42'
         res = chatter.route(data)
         (check
-            .src('__waiting_input')
+            .src('맞추는중')
             .dest('홈')
             .msg('text')
             .contain('맞았습니다')
@@ -164,9 +177,7 @@ class Checker:
         self._wrapper = wrapper
 
     def do(self, response):
-        if isinstance(self._wrapper, CheckerWrapper):
-            self._wrapper.response = response
-            self._wrapper = self._wrapper.unwrap()
+        self._wrapper = Checker._through_to_core(self._wrapper, response)
         return self._wrapper
 
     def __getattr__(self, name):
