@@ -114,6 +114,52 @@ class TestChatterRoute:
             .home()
             .do(res))
 
+    def test_once_input_scenario(self, chatter, data):
+        check = Checker().init(chatter).user(data['user_key'])
+        chatter.add_base('홈', lambda: Keyboard(['숫자 맞추기']))
+
+        @chatter.rule('숫자 맞추기', '홈', '맞추는중')
+        def guess(data):
+            message = '숫자 맞추기를 시작합니다.'
+            return Text(message) + Keyboard(type='text')
+
+        @chatter.rule(action='*', src='맞추는중', dest='홈')
+        def decide(data):
+            answer = data['content']
+
+            if answer == '42':
+                text = Text('맞았습니다!')
+            else:
+                text = Text('틀렸습니다!')
+            return text + chatter.home()
+
+        assert chatter.rules.action('숫자 맞추기').one() is not None
+        assert chatter.rules.src('맞추는중').one() is not None
+
+        data['content'] = '숫자 맞추기'
+        res = chatter.route(data)
+        data['content'] = '21'
+        res = chatter.route(data)
+        (check
+            .src('맞추는중')
+            .dest('홈')
+            .msg('text')
+            .contain('틀렸습니다')
+            .home()
+            .do(res))
+
+        data['content'] = '숫자 맞추기'
+        res = chatter.route(data)
+        data['content'] = '42'
+        res = chatter.route(data)
+        (check
+            .src('맞추는중')
+            .dest('홈')
+            .msg('text')
+            .contain('맞았습니다')
+            .home()
+            .do(res))
+
 
 class Asserter:
     def init(self, chatter):
