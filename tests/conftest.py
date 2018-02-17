@@ -69,9 +69,9 @@ def chatter():
     return Chatter()
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='class', params=['dict', 'timeout_dict'])
 def registered_chatter(request, handler):
-    chatter = Chatter()
+    chatter = Chatter(request.param)
     chatter.add_base('홈', handler['home_keyboard'])
     chatter.add_rule('자기소개', '홈', '소개', handler['intro'])
     chatter.add_rule('오늘의 날씨', '소개', '홈', handler['weather'])

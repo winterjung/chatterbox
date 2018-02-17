@@ -1,12 +1,12 @@
 from functools import wraps
 
-from chatterbox.memory import DictionaryMemory
+from chatterbox.memory import DictionaryMemory, TimeoutDictionaryMemory
 from chatterbox.rule import RuleBook
 from chatterbox.utils import listify
 
 
 class Chatter:
-    def __init__(self, memory='dict'):
+    def __init__(self, memory='dict', fallback=False):
         self.rules = RuleBook()
         self.home = HomeBase()
         try:
@@ -14,10 +14,12 @@ class Chatter:
         except KeyError:
             raise KeyError('Unsupported memory type: {}'.format(memory))
         self.memory = memory_type()
+        self.fallback = fallback
 
     def _lookup_memory(self, memory):
         table = {
             'dict': DictionaryMemory,
+            'timeout_dict': TimeoutDictionaryMemory,
         }
         return table[memory]
 
@@ -25,8 +27,8 @@ class Chatter:
         @wraps(func)
         def wrapper(data):
             result = func(data)
-            user = self.user(data['user_key'], False)
             if dest is not None:
+                user = self.user(data['user_key'])
                 user.move(dest)
                 self._update_user(user)
             return result
@@ -86,6 +88,8 @@ class Chatter:
             rule = self.rules.action('*').src(current_state).first()
         if rule is None:
             rule = self.rules.action(action).src('*').first()
+        if rule is None and self.fallback:
+            rule = self.rules.action(action).first()
         if rule is None:
             raise ValueError('there is no matching function')
         return rule
