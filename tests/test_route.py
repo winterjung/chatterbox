@@ -51,6 +51,8 @@ class TestChatterRoute:
             self.chatter.route(data)
         assert 'there is no matching function' in str(excinfo.value)
 
+
+class TestChatterInput:
     def test_endless_input_scenario(self, chatter, data):
         check = Checker().init(chatter).user(data['user_key'])
         chatter.add_base('홈', lambda: Keyboard(['숫자 맞추기']))

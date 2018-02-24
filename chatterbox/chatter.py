@@ -1,27 +1,23 @@
 from functools import wraps
 
-from chatterbox.memory import DictionaryMemory, TimeoutDictionaryMemory
+from chatterbox.memory import available
 from chatterbox.rule import RuleBook
 from chatterbox.utils import listify
 
 
 class Chatter:
-    def __init__(self, memory='dict', fallback=False):
+    def __init__(self,
+                 memory: str = 'dict',
+                 frequency: int = 10,
+                 fallback: bool = False):
         self.rules = RuleBook()
         self.home = HomeBase()
         try:
-            memory_type = self._lookup_memory(memory)
+            memory_type = available[memory]
         except KeyError:
             raise KeyError('Unsupported memory type: {}'.format(memory))
-        self.memory = memory_type()
+        self.memory = memory_type(frequency=frequency)
         self.fallback = fallback
-
-    def _lookup_memory(self, memory):
-        table = {
-            'dict': DictionaryMemory,
-            'timeout_dict': TimeoutDictionaryMemory,
-        }
-        return table[memory]
 
     def add_rule(self, action=None, src=None, dest=None, func=None):
         @wraps(func)

@@ -36,7 +36,7 @@ class RuleBook:
         return RuleBook(rules=self._filter('dest', name))
 
     def first(self):
-        if len(self._rules) > 0:
+        if self._rules:
             return self._rules[0]
         return None
 

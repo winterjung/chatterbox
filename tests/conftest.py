@@ -1,6 +1,7 @@
 import pytest
 
 from chatterbox import Chatter
+from chatterbox.memory import available
 from chatterbox.response import Keyboard, Message, MessageButton, Photo, Text
 
 
@@ -64,12 +65,12 @@ def response_dict(request):
     request.cls.response_ins = data_instance
 
 
-@pytest.fixture(scope='function')
-def chatter():
-    return Chatter()
+@pytest.fixture(scope='function', params=available.keys())
+def chatter(request):
+    return Chatter(request.param)
 
 
-@pytest.fixture(scope='class', params=['dict', 'timeout_dict'])
+@pytest.fixture(scope='class', params=available.keys())
 def registered_chatter(request, handler):
     chatter = Chatter(request.param)
     chatter.add_base('홈', handler['home_keyboard'])
