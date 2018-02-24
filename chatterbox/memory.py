@@ -1,7 +1,35 @@
 import abc
+import atexit
+import contextlib
 import json
+import pathlib
+import sqlite3
+import tempfile
 from datetime import datetime
+from functools import wraps
 from types import SimpleNamespace
+
+
+def count(func):
+    call_count = 0
+
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        nonlocal call_count
+        self = args[0]
+
+        call_count += 1
+        if call_count > self.frequency:
+            self.collect()
+            call_count = 0
+
+        result = func(*args, **kwargs)
+        return result
+    return decorator
+
+
+def now():
+    return int(datetime.utcnow().timestamp())
 
 
 class BaseMemory(metaclass=abc.ABCMeta):
@@ -21,59 +49,49 @@ class BaseMemory(metaclass=abc.ABCMeta):
     def delete(self, user):
         pass
 
+    @abc.abstractmethod
+    def collect(self):
+        pass
+
 
 class DictionaryMemory(BaseMemory):
-    def __init__(self):
-        self.user_list = dict()
-
-    def user(self, user_key):
-        return self.user_list.get(user_key)
-
-    def create(self, user_key, home_name):
-        self.user_list[user_key] = User(user_key, home_name)
-        return self.user(user_key)
-
-    def save(self, user):
-        self.user_list[user.user_key] = user
-
-    def delete(self, user):
-        self.user_list.pop(user.user_key)
-
-
-class TimeoutDictionaryMemory(BaseMemory):
     TIMEOUT = 10 * 60
 
-    def __init__(self):
+    def __init__(self, frequency):
         self.user_list = dict()
+        self.frequency = frequency
 
     def user(self, user_key):
         if user_key in self.user_list:
             return self.user_list.get(user_key).get('user')
         return None
 
-    def create(self, user_key, home_name):
+    @count
+    def create(self, user_key, current_state):
         self.user_list[user_key] = {
-            'user': User(user_key, home_name),
-            'last_time': datetime.utcnow().timestamp(),
+            'user': User(user_key, current_state),
+            'last_time': now(),
         }
         return self.user(user_key)
 
+    @count
     def save(self, user):
         self.user_list[user.user_key] = {
             'user': user,
-            'last_time': datetime.utcnow().timestamp(),
+            'last_time': now(),
         }
 
+    @count
     def delete(self, user):
         self.user_list.pop(user.user_key)
 
     def collect(self):
-        now = datetime.utcnow().timestamp()
+        utcnow = now()
 
         def check(key):
             user = self.user_list.get(key)
             last_time = user.get('last_time')
-            return now - last_time > self.TIMEOUT
+            return utcnow - last_time > self.TIMEOUT
 
         targets = filter(check, self.user_list)
 
@@ -93,7 +111,7 @@ class User(SimpleNamespace):
         return self
 
     def to_json(self):
-        return json.dumps(self.__dict__)
+        return json.dumps(self.__dict__, ensure_ascii=False)
 
     @classmethod
     def from_json(cls, obj):
