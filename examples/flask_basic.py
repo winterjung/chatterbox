@@ -22,7 +22,7 @@ def intro(data):
 @chatter.rule(action='오늘의 날씨', src='소개', dest='홈')
 def weather(data):
     text = Text('오늘은 하루종일 맑겠습니다.')
-    sunny_image_url = 'http://images.all-free-download.com/images/graphiclarge/sunny_lawn_hd_picture_165992.jpg'
+    sunny_image_url = 'https://www.python.org/static/img/python-logo.png'
     photo = Photo(url=sunny_image_url, width=600, height=401)
     keyboard = chatter.home()
     return text + photo + keyboard
@@ -69,4 +69,4 @@ def exit_friend(key):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
