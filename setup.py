@@ -43,7 +43,7 @@ class UploadCommand(Command):
 
 setup(
     name='chatterbox.py',
-    version='0.1.0',
+    version='0.2.0',
     description='Python library for Kakaotalk chatbot',
     long_description='Help to make kakaotalk chatbot using a state machine.',
     author='JungWinter',
@@ -56,7 +56,7 @@ setup(
     include_package_data=True,
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: Korean',
