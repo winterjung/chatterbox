@@ -5,64 +5,92 @@ from chatterbox.memory import available
 from chatterbox.response import Keyboard, Message, MessageButton, Photo, Text
 
 
-@pytest.fixture(scope='class')
-def response_dict(request):
-    text = {
-        'text': '안녕!',
-    }
-    photo = {
-        'url': 'https://photo.src',
-        'width': 640,
-        'height': 480,
-    }
-    message_button = {
-        'label': '안녕!',
-        'url': 'https://button/url',
-    }
-    input_keyboard = {
-        'type': 'text',
-    }
-    button_keyboard = {
-        'type': 'buttons',
-        'buttons': ['버튼1', '버튼2'],
-    }
-    data_dict = dict(
-        input_keyboard={
-            'keyboard': input_keyboard,
-        },
-        button_keyboard={
-            'keyboard': button_keyboard,
-        },
-        text={
-            'message': text,
-        },
-        photo={
+@pytest.fixture
+def message_dict():
+    class Data:
+        text = {
             'message': {
-                'photo': photo,
+                'text': '안녕!',
             },
-        },
-        message_button={
+        }
+        photo = {
             'message': {
-                'message_button': message_button,
+                'photo': {
+                    'url': 'https://photo.src',
+                    'width': 640,
+                    'height': 480,
+                },
             },
-        },
-        full={
+        }
+        button = {
             'message': {
-                **text,
-                'photo': photo,
-                'message_button': message_button,
+                'message_button': {
+                    'label': '안녕!',
+                    'url': 'https://button/url',
+                },
             },
-        },
-    )
-    data_instance = dict(
-        text=Text(**text),
-        photo=Photo(**photo),
-        message_button=MessageButton(**message_button),
-        input_keyboard=Keyboard(**input_keyboard),
-        button_keyboard=Keyboard(**button_keyboard),
-    )
-    request.cls.response = data_dict
-    request.cls.response_ins = data_instance
+        }
+        full = {
+            'message': {
+                'text': text['message']['text'],
+                'photo': photo['message']['photo'],
+                'message_button': button['message']['message_button'],
+            },
+        }
+    return Data()
+
+
+@pytest.fixture
+def message_ins():
+    class Data:
+        text = Text('안녕!')
+        photo = Photo('https://photo.src', 640, 480)
+        button = MessageButton('안녕!', 'https://button/url')
+        full = Message(text=text,
+                       photo=photo,
+                       message_button=button)
+    return Data()
+
+
+@pytest.fixture
+def message(message_dict, message_ins):
+    class Data:
+        dict = message_dict
+        ins = message_ins
+    return Data()
+
+
+@pytest.fixture
+def keyboard_dict():
+    class Data:
+        input = {
+            'keyboard': {
+                'type': 'text',
+            },
+        }
+        button = {
+            'keyboard': {
+                'type': 'buttons',
+                'buttons': ['버튼1', '버튼2'],
+            },
+        }
+    return Data()
+
+
+@pytest.fixture
+def keyboard_ins():
+    class Data:
+        input = Keyboard(type='text')
+        button = Keyboard(['버튼1', '버튼2'])
+    return Data()
+
+
+@pytest.fixture
+def keyboard(keyboard_dict, keyboard_ins):
+    class Data:
+        dict = keyboard_dict
+        ins = keyboard_ins
+    return Data()
 
 
 @pytest.fixture(scope='function', params=available.keys())

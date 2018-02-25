@@ -9,129 +9,159 @@ from chatterbox.response import (Keyboard, Message, MessageButton, Photo,
                                  Response, Text)
 
 
-@pytest.mark.usefixtures('response_dict')
-class TestResponse:
-    def test_keyboard(self):
+class TestKeyboard:
+    def test_input(self, keyboard):
         input_keyboard = Keyboard(type='text')
-        assert self.response['input_keyboard'] == input_keyboard
+        assert keyboard.dict.input == input_keyboard
+        assert input_keyboard.type == 'text'
+        assert input_keyboard.buttons is None
 
+    def test_button(self, keyboard):
         button_keyboard = Keyboard(['버튼1', '버튼2'])
-        assert self.response['button_keyboard'] == button_keyboard
+        assert keyboard.dict.button == button_keyboard
+        assert button_keyboard.type == 'buttons'
+        assert button_keyboard.buttons == ['버튼1', '버튼2']
 
-        serialized = '{"keyboard": {"type": "buttons", "buttons": ["버튼1"]}}'
-        keyboard = Keyboard(['버튼1'])
-        assert json.dumps(keyboard, ensure_ascii=False) == serialized
-
-    def test_invalid_keyboard(self):
+    def test_invalid_input_with_button(self):
         with pytest.raises(TypeError) as excinfo:
             Keyboard(['버튼1'], type='text')
         assert 'buttons must be None' in str(excinfo.value)
+
+    def test_invalid_button(self):
         with pytest.raises(TypeError) as excinfo:
             Keyboard('버튼1')
         assert 'buttons must be list' in str(excinfo.value)
+
+    def test_invalid_no_button(self):
         with pytest.raises(TypeError) as excinfo:
             Keyboard(type='buttons')
         assert 'buttons must be list' in str(excinfo.value)
+
+    def test_invalid_no_argument(self):
         with pytest.raises(TypeError) as excinfo:
             Keyboard()
         assert 'buttons must be list' in str(excinfo.value)
 
-    def test_text(self):
+
+class TestMessage:
+    def test_dict_with_instance(self, message):
+        assert message.dict.text == message.ins.text
+        assert message.dict.photo == message.ins.photo
+        assert message.dict.button == message.ins.button
+        assert message.dict.full == message.ins.full
+
+    def test_text(self, message):
         text = Text('안녕!')
         assert isinstance(text, Text)
-        text_with_kwargs = Text(text='안녕!')
-        assert self.response['text'] == text == text_with_kwargs
+        assert message.dict.text == text
 
-    def test_photo(self):
+        assert text.text == '안녕!'
+        assert text.message == {'text': '안녕!'}
+
+    def test_photo(self, message):
         photo = Photo('https://photo.src', 640, 480)
         assert isinstance(photo, Photo)
-        photo_with_kwargs = Photo(url='https://photo.src',
-                                  width=640,
-                                  height=480)
-        assert self.response['photo'] == photo == photo_with_kwargs
+        assert message.dict.photo == photo
 
-    def test_message_button(self):
+        assert photo.url == 'https://photo.src'
+        assert photo.width == 640
+        assert photo.height == 480
+        assert photo.message == {
+            'photo': {
+                'url': 'https://photo.src',
+                'width': 640,
+                'height': 480,
+            }
+        }
+
+    def test_button(self, message):
         button = MessageButton('안녕!', 'https://button/url')
         assert isinstance(button, MessageButton)
-        button_with_kwargs = MessageButton(label='안녕!',
-                                           url='https://button/url')
-        assert self.response['message_button'] == button == button_with_kwargs
+        assert message.dict.button == button
 
-    def test_message(self):
-        full = Message(text='안녕!',
-                       photo={
-                           'url': 'https://photo.src',
-                           'width': 640,
-                           'height': 480,
-                       },
-                       message_button={
-                           'label': '안녕!',
-                           'url': 'https://button/url',
-                       })
-        full_dict = self.response['full']
-        assert full_dict == full
-        assert full == Message(**full_dict['message'])
-
-    def test_message_combination_with_dict(self):
-        text = self.response_ins['text']
-        photo = self.response_ins['photo']
-        button = self.response_ins['message_button']
-
-        assert text + photo + button == self.response['full']
-        assert text + photo == {
-            'message': {
-                **self.response['text']['message'],
-                **self.response['photo']['message']
-            }
-        }
-        assert text + button == {
-            'message': {
-                **self.response['text']['message'],
-                **self.response['message_button']['message']
-            }
-        }
-        assert photo + button == {
-            'message': {
-                **self.response['photo']['message'],
-                **self.response['message_button']['message']
+        assert button.label == '안녕!'
+        assert button.url == 'https://button/url'
+        assert button.message == {
+            'message_button': {
+                'label': '안녕!',
+                'url': 'https://button/url',
             }
         }
 
-    def test_message_combination_with_instance(self):
-        text = self.response_ins['text']
-        photo = self.response_ins['photo']
-        button = self.response_ins['message_button']
+    def test_message(self, message):
+        full = message.ins.full
 
+        assert full.text == message.ins.text
+        assert full.photo == message.ins.photo
+        assert full.message_button == message.ins.button
+
+    def test_response(self, message, keyboard):
+        text = message.ins.text
+        photo = message.ins.photo
+        keyboard = keyboard.ins.button
+        response = text + photo + keyboard
+
+        assert isinstance(response, Response)
+        assert response == text + photo + keyboard
+        assert response.message == text + photo
+
+        assert response.message.text == text
+        assert response.message.text.text == '안녕!'
+
+        assert response.message.photo == photo
+        assert response.message.photo.url == 'https://photo.src'
+
+        assert response.keyboard == keyboard
+        assert response.keyboard.type == 'buttons'
+
+    def test_serializable(self, message, keyboard):
+        text = message.ins.text
+        photo = message.ins.photo
+        keyboard = keyboard.ins.button
+
+        message = text + photo
+        response = message + keyboard
+        assert json.dumps(message) is not None
+        assert json.dumps(response) is not None
+
+
+class TestCombination:
+    def test_message_instance_combination(self, message):
+        text = message.ins.text
+        photo = message.ins.photo
+        button = message.ins.button
         messages = (text, photo, button)
 
         repeats = range(1, len(messages)+1)
         combination = (combinations(messages, r) for r in repeats)
         flatten = chain(*combination)
+
         adder = partial(reduce, add)
+
         messages = map(adder, flatten)
+        for msg in messages:
+            assert msg == Message(**msg.message)
 
-        for message in messages:
-            assert message == Message(**message['message'])
+    def test_message_instnace_and_dict_combination(self, message):
+        text = message.ins.text
+        photo = message.ins.photo
+        button = message.ins.button
 
-    def test_advanced_message_combination(self):
-        text = self.response_ins['text']
-        photo = self.response_ins['photo']
-        button = self.response_ins['message_button']
+        text_dict = message.ins.text
+        photo_dict = message.ins.photo
+        button_dict = message.ins.button
 
-        text_dict = self.response['text']
-        photo_dict = self.response['photo']
-        button_dict = self.response['message_button']
+        assert text_dict + photo + button == message.ins.full
+        assert text + photo_dict + button == message.ins.full
+        assert text + photo + button_dict == message.ins.full
 
-        assert text_dict + photo + button == self.response['full']
-        assert text + photo_dict + button == self.response['full']
-        assert text + photo + button_dict == self.response['full']
+    def test_message_keyboard_combination(self, message, keyboard):
+        text = message.ins.text
+        photo = message.ins.photo
+        button = message.ins.button
 
-    def test_message_keyboard_combination(self):
-        text = self.response_ins['text']
-        photo = self.response_ins['photo']
-        button = self.response_ins['message_button']
-        input_keyboard = self.response_ins['input_keyboard']
-        button_keyboard = self.response_ins['button_keyboard']
+        input_keyboard = keyboard.ins.input
+        button_keyboard = keyboard.ins.button
 
         keyboards = (input_keyboard, button_keyboard)
         messages = (text, photo, button)
@@ -141,35 +171,36 @@ class TestResponse:
         flatten = chain(*combination)
         adder = partial(reduce, add)
         messages = map(adder, flatten)
+
         matrix = product(messages, keyboards)
+        for msg, keyboard in matrix:
+            assert msg + keyboard == Response(msg.message, keyboard.keyboard)
 
-        for message, keyboard in matrix:
-            assert message + keyboard == {**message, **keyboard}
+    def test_is_not_sensitivity_on_order(self, message, keyboard):
+        text = message.ins.text
+        photo = message.ins.photo
+        keyboard = keyboard.ins.button
 
-        combination = permutations((text, photo, button_keyboard))
+        adder = partial(reduce, add)
+        combination = permutations((text, photo, keyboard))
+
+        msg = text + photo
+        response = Response(msg.message, keyboard.keyboard)
         for combo in combination:
-            assert adder(combo) == Response(**(text+photo), **button_keyboard)
+            assert adder(combo) == response
 
-    def test_supported_operand(self):
-        text = self.response_ins['text']
-        photo = self.response_ins['photo']
-        button = self.response_ins['message_button']
-        keyboard = self.response_ins['button_keyboard']
+    def test_supported_operand(self, message, keyboard):
+        text = message.ins.text
+        photo = message.ins.photo
+        button = message.ins.button
+        full = message.ins.full
 
-        assert isinstance(text + photo, Message)
-        assert isinstance(text + button, Message)
-        assert isinstance(photo + button, Message)
-        assert isinstance(text + photo + button, Message)
+        messages = (text, photo, button, full)
+        keyboard = keyboard.ins.button
 
-        assert type(text + keyboard) is Response
-        assert type(photo + keyboard) is Response
-        assert type(button + keyboard) is Response
-        assert type(Message() + keyboard) is Response
-
-        assert type(keyboard + text) is Response
-        assert type(keyboard + photo) is Response
-        assert type(keyboard + button) is Response
-        assert type(keyboard + Message()) is Response
+        for msg in messages:
+            assert msg + keyboard == keyboard + msg
+            assert type(msg + keyboard) is Response
 
     def test_unsupported_operand(self):
         with pytest.raises(TypeError) as excinfo:

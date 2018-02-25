@@ -1,5 +1,6 @@
 import pytest
 
+from chatterbox import Chatter
 from chatterbox.rule import RuleBook
 
 
@@ -14,7 +15,8 @@ class TestRuleBook:
         for rule in rules:
             assert callable(rule.func)
 
-    def test_no_rule(self, chatter):
+    def test_no_rule(self):
+        chatter = Chatter()
         rule = chatter.rules.first()
         assert rule is None
 
