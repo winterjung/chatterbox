@@ -1,6 +1,7 @@
 # Chatterbox
 [![license]](/LICENSE)
 [![travis]](https://travis-ci.org/JungWinter/chatterbox)
+[![appveyor]](https://ci.appveyor.com/project/JungWinter/chatterbox)
 [![codecov]](https://codecov.io/gh/JungWinter/chatterbox)
 
 ---
@@ -330,6 +331,7 @@ def cancel(data):
 [Chatterbox]: https://github.com/JungWinter/chatterbox
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [travis]: https://travis-ci.org/JungWinter/chatterbox.svg
+[appveyor]: https://ci.appveyor.com/api/projects/status/ispy5kkm050m0ka5?svg=true
 [codecov]: https://codecov.io/gh/JungWinter/chatterbox/branch/master/graph/badge.svg
 [카카오톡 플러스친구 자동응답 API]: https://github.com/plusfriend/auto_reply
 [examples]: https://github.com/JungWinter/chatterbox/blob/master/examples
