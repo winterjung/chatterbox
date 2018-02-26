@@ -64,7 +64,6 @@ if __name__ == '__main__':
 
 ## :gem: Usage
 ### Chatter
-`Chatter([memory|frequency|fallback])`
 [FSM(finite-state machine)]을 사용해 유저들의 state를 내부에 저장하고, 요청에 맞는 response를 반환합니다.
 
 #### `Chatter.route(data: dict) -> dict`

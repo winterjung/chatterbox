@@ -11,7 +11,7 @@
 <!-- 이 PR이 어떤 목적이고 이를 통해 어떤 점이 바뀌는지 적어주세요. -->
 
 ## :white_check_mark: Checklist
-- [ ] 최신 master brunch와 동기화 여부
+- [ ] 최신 master branch와 동기화 여부
 - [ ] 새로운 기능에 대한 테스트와 docstring 포함
 - [ ] 모든 테스트 통과
 
