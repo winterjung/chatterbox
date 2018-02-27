@@ -5,6 +5,7 @@ from setuptools import setup, find_packages, Command
 
 
 here = os.path.abspath(os.path.dirname(__file__))
+VERSION = '0.2.1'
 
 
 class UploadCommand(Command):
@@ -38,29 +39,34 @@ class UploadCommand(Command):
         self.status('Uploading the package to PyPi via Twine…')
         os.system('twine upload dist/*')
 
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(VERSION))
+        os.system('git push --tags')
+
         sys.exit()
 
 
 setup(
     name='chatterbox.py',
-    version='0.2.0',
+    version=VERSION,
     description='Python library for Kakaotalk chatbot',
     long_description='Help to make kakaotalk chatbot using a state machine.',
     author='JungWinter',
     author_email='wintermy201@gmail.com',
     url='https://github.com/JungWinter/chatterbox',
-    packages=find_packages(exclude=('tests', 'examples', 'concept')),
+    packages=find_packages(exclude=('tests', 'examples')),
     py_modules=['chatterbox'],
     install_requires=[],
-    tests_require=["pytest", "pylint", "tox", "pytest-cov"],
+    tests_require=['pytest', 'pylint', 'tox', 'pytest-cov'],
     include_package_data=True,
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: Korean',
         'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
