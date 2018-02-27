@@ -113,6 +113,9 @@ class Keyboard(dict, KeyboardAddMixin):
         }
         return mapping.get(self.type)
 
+    def items(self):
+        return dict(**self.keyboard).items()
+
     @classmethod
     def generate_text_keyboard(cls):
         return dict(type='text')
