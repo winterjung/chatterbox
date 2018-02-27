@@ -42,6 +42,16 @@ class TestKeyboard:
             Keyboard()
         assert 'buttons must be list' in str(excinfo.value)
 
+    def test_serializable(self):
+        keyboard = Keyboard(['버튼1', '버튼2'])
+        serialized = json.dumps(keyboard, ensure_ascii=False)
+        deserialized = json.loads(serialized)
+        assert deserialized == {
+            'type': 'buttons',
+            'buttons': ['버튼1', '버튼2'],
+        }
+        assert Keyboard(**deserialized) == keyboard
+
 
 class TestMessage:
     def test_dict_with_instance(self, message):
