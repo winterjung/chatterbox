@@ -191,28 +191,36 @@ class Asserter:
 
     def msg(self, messages):
         for msg in listify(messages):
-            assert msg in self.response['message']
+            assert msg in self.response.message.message
         return self
 
     def home(self):
         home_keyboard = self.chatter.home()
-        assert self.response['keyboard'] == home_keyboard['keyboard']
+        assert self.response.keyboard == home_keyboard
         return self
 
     def keyboard(self, keyboard_type):
-        assert self.response['keyboard']['type'] == keyboard_type
+        assert self.response.keyboard.type == keyboard_type
         return self
 
     def contain(self, target):
-        msg = self.response['message']
-        text = msg.get('text', '')
-        photo = msg.get('photo', {})
-        button = msg.get('message_button', {})
+        msg = self.response.message
+        text = msg.text
+        photo = msg.photo
+        button = msg.message_button
 
-        in_text = target in text
-        in_photo = target in photo.get('url', '')
-        in_button_label = target in button.get('label', '')
-        in_button_url = target in button.get('url', '')
+        in_text = False
+        in_photo = False
+        in_button_label = False
+        in_button_url = False
+
+        if text:
+            in_text = target in text.text
+        if photo:
+            in_photo = target in photo.url
+        if button:
+            in_button_label = target in button.label
+            in_button_url = target in button.url
 
         assert any([in_text, in_photo, in_button_label, in_button_url])
         return self
