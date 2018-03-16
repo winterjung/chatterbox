@@ -1,6 +1,8 @@
 import abc
 import atexit
 import contextlib
+import hashlib
+import inspect
 import json
 import pathlib
 import sqlite3
@@ -110,7 +112,12 @@ class SqliteMemory(BaseMemory):
         atexit.register(SqliteMemory.remove_db, self.path)
 
     @staticmethod
-    def db_path(name='chatterbox.db'):
+    def db_path(name=None):
+        if name is None:
+            frame = inspect.stack()[-1]
+            file = frame.frame.f_locals.get('__file__', '.')
+            path = str(pathlib.Path(file).resolve())
+            name = hashlib.md5(path.encode()).hexdigest()
         temp = tempfile.gettempdir()
         path = pathlib.Path(temp, name)
         return path
