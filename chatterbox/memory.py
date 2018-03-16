@@ -114,8 +114,9 @@ class SqliteMemory(BaseMemory):
     @staticmethod
     def db_path(name=None):
         if name is None:
-            frame = inspect.stack()[-1]
-            file = frame.frame.f_locals.get('__file__', '.')
+            frame_info = inspect.stack()[-1]
+            frame = frame_info[0]
+            file = frame.f_locals.get('__file__', '.')
             path = str(pathlib.Path(file).resolve())
             name = hashlib.md5(path.encode()).hexdigest()
         temp = tempfile.gettempdir()
