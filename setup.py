@@ -5,7 +5,7 @@ from setuptools import setup, find_packages, Command
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 
 
 class UploadCommand(Command):
@@ -60,6 +60,7 @@ setup(
     tests_require=['pytest', 'pylint', 'tox', 'pytest-cov'],
     include_package_data=True,
     license='MIT',
+    python_requires='>=3.4.0',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
