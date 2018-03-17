@@ -5,9 +5,10 @@
 - `Fix`: 잘못된 부분 수정
 - `Change`: 작동 방식 변경
 
-## [0.2.2] - 2018-03-16
+## [0.2.3] - 2018-03-16
 ### Fix
 - `chatterbox.memory.SqliteMemory`를 생성할 때 db 경로가 `tempdir`의 `chatterbox.db`로 고정되어 있어 두개 이상의 chatterbox 앱을 구동시킬 때 같은 db를 공유해 나중에 실행된 앱이 먼저 생성된 앱의 db를 삭제하는 문제가 발생하는 현상을 해결했습니다.
+- python 3.4 환경에서 `inspect.stack()`의 결과가 `tuple`이라 3.5 이상의 환경과 동작이 달랐던 점을 수정했습니다.
 
 ## [0.2.1] - 2018-02-27
 ### Fix
@@ -30,6 +31,6 @@
 [0.2.0]: https://github.com/JungWinter/chatterbox/compare/v0.1.0...v0.2.0
 [Example]: https://github.com/JungWinter/chatterbox/blob/v0.2.0/tests/test_response.py#L98-L115
 [0.2.1]: https://github.com/JungWinter/chatterbox/compare/v0.2.0...v0.2.1
-[0.2.1]: https://github.com/JungWinter/chatterbox/compare/v0.2.1...v0.2.2
+[0.2.3]: https://github.com/JungWinter/chatterbox/compare/v0.2.1...v0.2.3
 [flask에서 json.dumps 사용]: https://github.com/pallets/flask/blob/master/flask/json/__init__.py#L275
 [django에서 json.dumps 사용]: https://docs.djangoproject.com/en/dev/_modules/django/http/response/#JsonResponse
