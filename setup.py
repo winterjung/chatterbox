@@ -5,7 +5,7 @@ from setuptools import setup, find_packages, Command
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-VERSION = '0.2.2'
+VERSION = '0.2.3'
 
 
 class UploadCommand(Command):
