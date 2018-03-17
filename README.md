@@ -326,6 +326,8 @@ def cancel(data):
 ## :pray: Contribution
 [CONTRIBUTING.md]을 참고해주세요.
 
+## :link: Related projects
+* [홍익대학교 학식알리미 셰프 홍]
 
 [Chatterbox]: https://github.com/JungWinter/chatterbox
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
@@ -340,3 +342,4 @@ def cancel(data):
 [Keyboard object 문서]: https://github.com/plusfriend/auto_reply/blob/master/README.md#61-keyboard
 [examples/flask_advance.py]: https://github.com/JungWinter/chatterbox/blob/master/examples/flask_advance.py
 [CONTRIBUTING.md]: https://github.com/JungWinter/chatterbox/blob/master/.github/CONTRIBUTING.md
+[홍익대학교 학식알리미 셰프 홍]: https://github.com/JungWinter/chef-hong

@@ -11,6 +11,8 @@
 
 [Text type keyboard]의 동작과 주관식 답변을 어떻게 처리하는지 볼 수 있습니다. Chatter의 파라매터인 `memory`, `frequency`, `fallback`의 동작을 확인해볼 수 있습니다.
 
+## Related projects
+* [홍익대학교 학식알리미 셰프 홍 `chatter.py`]
 
 [flask_basic]: https://raw.githubusercontent.com/JungWinter/chatterbox/master/examples/images/flask_basic.png
 [flask_advance]: https://raw.githubusercontent.com/JungWinter/chatterbox/master/examples/images/flask_advance.png
@@ -19,3 +21,4 @@
 [Postman]: https://documenter.getpostman.com/view/2926928/chatterbox-example/RVg2BUiV
 [`flask_advance.py`]: https://github.com/JungWinter/chatterbox/blob/master/examples/flask_advance.py
 [Text type keyboard]: https://github.com/plusfriend/auto_reply#6-object
+[홍익대학교 학식알리미 셰프 홍 `chatter.py`]: https://github.com/JungWinter/chef-hong/blob/master/app/api/chatter.py
