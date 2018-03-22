@@ -340,6 +340,6 @@ def cancel(data):
 [카카오톡 자동응답 api 명세]: https://github.com/plusfriend/auto_reply#specification-1
 [카카오톡 response object 명세]: https://github.com/plusfriend/auto_reply/blob/master/README.md#6-object
 [Keyboard object 문서]: https://github.com/plusfriend/auto_reply/blob/master/README.md#61-keyboard
-[examples/flask_advance.py]: https://github.com/JungWinter/chatterbox/blob/master/examples/flask_advance.py
+[examples/flask_advance.py]: https://github.com/JungWinter/chatterbox/blob/master/examples/flask/flask_advance.py
 [CONTRIBUTING.md]: https://github.com/JungWinter/chatterbox/blob/master/.github/CONTRIBUTING.md
 [홍익대학교 학식알리미 셰프 홍]: https://github.com/JungWinter/chef-hong
