@@ -1,5 +1,7 @@
 # Chatterbox
 [![license]](/LICENSE)
+[![pypi]](https://pypi.org/project/chatterbox.py/)
+[![pyversions]](http://pypi.python.org/pypi/chatterbox.py)
 [![travis]](https://travis-ci.org/JungWinter/chatterbox)
 [![appveyor]](https://ci.appveyor.com/project/JungWinter/chatterbox)
 [![codecov]](https://codecov.io/gh/JungWinter/chatterbox)
@@ -331,6 +333,8 @@ def cancel(data):
 
 [Chatterbox]: https://github.com/JungWinter/chatterbox
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
+[pypi]: https://img.shields.io/pypi/v/chatterbox.py.svg
+[pyversions]: https://img.shields.io/pypi/pyversions/chatterbox.py.svg
 [travis]: https://travis-ci.org/JungWinter/chatterbox.svg
 [appveyor]: https://ci.appveyor.com/api/projects/status/ispy5kkm050m0ka5?svg=true
 [codecov]: https://codecov.io/gh/JungWinter/chatterbox/branch/master/graph/badge.svg
