@@ -4,8 +4,12 @@ from shutil import rmtree
 from setuptools import setup, find_packages, Command
 
 
+if sys.version_info < (3, 4):
+    sys.exit('Python < 3.4 is not supported')
+
+
 here = os.path.abspath(os.path.dirname(__file__))
-VERSION = '0.2.3'
+VERSION = '0.2.4'
 
 
 class UploadCommand(Command):
@@ -33,7 +37,7 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(
+        os.system('{0} setup.py sdist bdist_wheel'.format(
             sys.executable))
 
         self.status('Uploading the package to PyPi via Twine…')
@@ -60,7 +64,7 @@ setup(
     tests_require=['pytest', 'pylint', 'tox', 'pytest-cov'],
     include_package_data=True,
     license='MIT',
-    python_requires='>=3.4.0',
+    python_requires='>=3.4',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -69,7 +73,7 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
