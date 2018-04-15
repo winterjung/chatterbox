@@ -10,6 +10,31 @@
 
 <b>[Chatterbox]</b>는 [카카오톡 플러스친구 자동응답 API]를 활용하여 챗봇을 만들 때 사용되는 파이썬 라이브러리입니다.
 
+**Table of Contents**
+
+- [:memo: Installation](#memo-installation)
+- [:rocket: Example](#rocket-example)
+- [:gem: Usage](#gem-usage)
+  - [Chatter](#chatter)
+    - [`Chatter.route(data)`](#chatterroutedata)
+  - [Response](#response)
+    - [Text(text)](#texttext)
+    - [Photo(url, width, height)](#photourl-width-height)
+    - [MessageButton(label, url)](#messagebuttonlabel-url)
+    - [Keyboard(buttons, type)](#keyboardbuttons-type)
+    - [조합](#%EC%A1%B0%ED%95%A9)
+  - [Base](#base)
+    - [`Chatter.add_base(name, func)`](#chatteradd_basename-func)
+    - [`@Chatter.base(name)`](#chatterbasename)
+    - [`Chatter.home()`](#chatterhome)
+  - [Rule](#rule)
+    - [`Chatter.add_rule(action, src, dest, func)`](#chatteradd_ruleaction-src-dest-func)
+    - [`@Chatter.rule(action, src, dest)`](#chatterruleaction-src-dest)
+    - [주관식 답변 처리하기](#%EC%A3%BC%EA%B4%80%EC%8B%9D-%EB%8B%B5%EB%B3%80-%EC%B2%98%EB%A6%AC%ED%95%98%EA%B8%B0)
+    - [fallback 처리하기](#fallback-%EC%B2%98%EB%A6%AC%ED%95%98%EA%B8%B0)
+- [:pray: Contribution](#pray-contribution)
+- [:link: Related projects](#link-related-projects)
+
 ## :memo: Installation
 
 ```shell
@@ -68,7 +93,7 @@ if __name__ == '__main__':
 ### Chatter
 [FSM(finite-state machine)]을 사용해 유저들의 state를 내부에 저장하고, 요청에 맞는 response를 반환합니다.
 
-#### `Chatter.route(data: dict) -> dict`
+#### `Chatter.route(data)`
 [카카오톡 자동응답 api 명세]에 맞는 json 데이터를 인자로 받습니다. `user_key`로 가져온 state와 `content`값을 action으로 적절한 rule을 찾아 등록된 함수를 실행한 후 api 명세에 맞는 response를 반환합니다. rule에 관해선 아래에 서술되어 있습니다.
 
 ##### 예제
