@@ -1,6 +1,6 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
+name: "\U0001F680 Feature Request"
+about: "내게 이런 좋은 생각이 있어요! \U0001F642"
 
 ---
 

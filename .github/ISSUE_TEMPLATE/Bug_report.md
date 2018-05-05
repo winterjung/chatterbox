@@ -1,6 +1,6 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: "\U0001F41B Bug Report"
+about: "내 예상과 다르게 작동해요! \U0001F914"
 
 ---
 
