@@ -1,3 +1,38 @@
+"""
+Module Chatter
+==============
+
+>>> chatter = Chatter()
+>>> @chatter.base(name='홈')
+    def home_keyboard():
+        home_buttons = ['자기소개']
+        return Keyboard(home_buttons)
+
+>>> @chatter.rule(action='자기소개', src='홈', dest='홈')
+    def intro(data):
+        message = '안녕하세요! chatterbox 입니다!'
+        buttons = ['자기소개']
+        return Text(message) + Keyboard(buttons)
+>>> data = {
+        'user_key': 'example',
+        'content': '자기소개',
+        'type': 'text',
+    }
+>>> chatter.route(data)
+{
+    'message': {
+        'text': '안녕하세요! chatterbox 입니다!',
+    },
+    'keyboard': {
+        'type': 'buttons',
+        'buttons': [
+            '자기소개',
+        ]
+    }
+}
+
+"""
+
 from functools import wraps
 
 from chatterbox.memory import available
@@ -6,10 +41,17 @@ from chatterbox.utils import listify
 
 
 class Chatter:
-    def __init__(self,
-                 memory: str = 'dict',
-                 frequency: int = 10,
-                 fallback: bool = False):
+    """Main class to route users"""
+    def __init__(self, memory='dict', frequency=10, fallback=False):
+        """Create a main chatter instance with memory type
+
+        :param memory: Type of memory
+        :type memory: str
+        :param frequency: Number about how often clear memory
+        :type frequency: int
+        :param fallback: If True, route fallback function when unrecognize
+        :type fallback: boot
+        """
         self.rules = RuleBook()
         self.home = HomeBase()
         try:

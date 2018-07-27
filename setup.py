@@ -9,7 +9,11 @@ if sys.version_info < (3, 4):
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-VERSION = '0.2.4'
+
+with open(os.path.join(here, 'README.md')) as fp:
+        long_description = '\n' + fp.read()
+
+VERSION = '0.2.5'
 
 
 class UploadCommand(Command):
@@ -54,7 +58,8 @@ setup(
     name='chatterbox.py',
     version=VERSION,
     description='Python library for Kakaotalk chatbot',
-    long_description='Help to make kakaotalk chatbot using a state machine.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='JungWinter',
     author_email='wintermy201@gmail.com',
     url='https://github.com/JungWinter/chatterbox',
