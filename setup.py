@@ -10,8 +10,12 @@ if sys.version_info < (3, 4):
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, 'README.md')) as fp:
+DESCRIPTION = 'Python library for Kakaotalk chatbot'
+try:
+    with open(os.path.join(here, 'README.md'), encoding='utf-8') as fp:
         long_description = '\n' + fp.read()
+except FileNotFoundError:
+    long_description = DESCRIPTION
 
 VERSION = '0.2.5'
 
@@ -57,7 +61,7 @@ class UploadCommand(Command):
 setup(
     name='chatterbox.py',
     version=VERSION,
-    description='Python library for Kakaotalk chatbot',
+    description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='JungWinter',
