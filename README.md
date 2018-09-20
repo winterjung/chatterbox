@@ -5,6 +5,7 @@
 [![travis]](https://travis-ci.org/JungWinter/chatterbox)
 [![appveyor]](https://ci.appveyor.com/project/JungWinter/chatterbox)
 [![codecov]](https://codecov.io/gh/JungWinter/chatterbox)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FJungWinter%2Fchatterbox.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FJungWinter%2Fchatterbox?ref=badge_shield)
 
 ---
 
@@ -372,3 +373,7 @@ def cancel(data):
 [examples/flask_advance.py]: https://github.com/JungWinter/chatterbox/blob/master/examples/flask/flask_advance.py
 [CONTRIBUTING.md]: https://github.com/JungWinter/chatterbox/blob/master/.github/CONTRIBUTING.md
 [홍익대학교 학식알리미 셰프 홍]: https://github.com/JungWinter/chef-hong
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FJungWinter%2Fchatterbox.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FJungWinter%2Fchatterbox?ref=badge_large)
